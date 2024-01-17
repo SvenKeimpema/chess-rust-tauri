@@ -1,7 +1,7 @@
 pub mod pawn {
-    use crate::piece_interfaces::MultiSideMovingPiece;
-    use crate::bitboard::constants::{A_FILE,  H_FILE};
-    use crate::bitboard::math::set_bit_not_exists;
+    use crate::board::bitboard::constants::{A_FILE, H_FILE};
+    use crate::board::bitboard::math::set_bit_not_exists;
+    use crate::pieces::piece_interfaces::MultiSideMovingPiece;
 
     // in pawn_mask will be all pre generated moves from get_mask
     pub struct Pawn {

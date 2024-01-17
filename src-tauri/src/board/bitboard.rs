@@ -1,15 +1,15 @@
 pub mod math {
-    use crate::bitboard::constants::{DEBRUIJ_T, DEBRUIJ_M};
+    use crate::board::bitboard::constants::{DEBRUIJ_T, DEBRUIJ_M};
 
     #[macro_export]
     macro_rules! set_bit {
         ($bb:expr, $sq:expr) => {
             {
-                let mut bb: u64 = $bb;
+                let bb: &mut u64 = $bb;
                 let sq: u64 = $sq as u64;
 
                 if(sq < 64) {
-                    bb |= (1u64 << sq);
+                    *bb |= (1u64 << sq);
                 }
 
                 bb
@@ -37,28 +37,32 @@ pub mod math {
 
     #[macro_export]
     macro_rules! clear_bit {
-        ($bb:expr, $sq:expr) => {
-            {
-                let mut bb: u64 = $bb;
-                let sq: u64 = $sq as u64;
+       ($bb:expr, $sq:expr) => {
+           {
+               let bb: &mut u64 = &mut $bb;
+               let sq: u64 = $sq as u64;
 
-                if(sq < 64) {
-                    bb ^= (1u64 << sq);
-                }
+               if(sq < 64) {
+                   *bb ^= (1u64 << sq);
+               }
 
-                bb
-            }
-        };
+               bb
+           }
+       };
     }
 
-    pub(crate) fn set_bit_not_exists(bb: u64, mask: u64, sq: i32) -> u64 {
+
+    pub(crate) fn set_bit_not_exists(mut bb: u64, mask: u64, sq: i32) -> u64 {
         if sq < 64 && !get_bit!(mask, sq) {
-            return set_bit!(bb, sq);
+            set_bit!(&mut bb, sq);
+
+            return bb;
         }
 
         return bb;
     }
 
+    // dead_code is allowed here, only used for debugging!
     #[allow(dead_code)]
     /// Testing tool for printing out bitboards to console
     pub fn print_bitboard(bb: u64) {
@@ -87,7 +91,8 @@ pub mod math {
             // least significant first square
             let ls1sq = get_ls1b(mask);
 
-            mask = clear_bit!(mask, ls1sq as i32);
+            clear_bit!(&mut mask, ls1sq as i32);
+
             if (index & (1u64 << bit)) != 0 {
                 result |= 1u64 << ls1sq;
             }
@@ -97,12 +102,14 @@ pub mod math {
 
     /// gets the lowest first significant bit
     /// this means that 6(011) will output 2 since the second bit is a 1
+    /// https://www.chessprogramming.org/BitScan De Bruijn Multiplication: With separated LS1B
     #[inline(always)]
     pub fn get_ls1b(bits: u64) -> u64 {
         DEBRUIJ_T[(((bits ^ bits.wrapping_sub(1)).wrapping_mul(DEBRUIJ_M)).wrapping_shr(58)) as usize]
     }
 }
 
+/// contains all u64 constants used in the program
 pub mod constants {
     //  bitboard info for moving pieces
     pub const A_FILE: u64 = 72340172838076673u64;

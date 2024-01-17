@@ -4,13 +4,13 @@ https://www.chessprogramming.net/generating-magic-multipliers/
  */
 
 use std::num::Wrapping;
-use crate::bishop::bishop::Bishop;
-use crate::bitboard::constants::{BISHOP_RELEVANT_BITS, ROOK_RELEVANT_BITS};
-use crate::bitboard::math::set_occ;
-use crate::piece_interfaces::SlidingPiece;
-use crate::random::generate_magic_number;
-use crate::rook::rook::Rook;
+use crate::board::bitboard::constants::{BISHOP_RELEVANT_BITS, ROOK_RELEVANT_BITS};
+use crate::board::bitboard::math::set_occ;
+use crate::pieces::piece_interfaces::SlidingPiece;
+use crate::helpers::random::generate_magic_number;
 use num_traits::WrappingShr;
+use crate::pieces::bishop::bishop::Bishop;
+use crate::pieces::rook::rook::Rook;
 
 pub struct MagicMoves {
     pub bishop_moves: Vec<Vec<u64>>,
@@ -126,12 +126,10 @@ impl MagicMovesGenerator for MagicMoves {
         let occ: u64 = set_occ(mask, relevant_total_bits as u64, idx as u64);
         let magic_occ = Wrapping(occ) * Wrapping(self.bishop_magic[square as usize]);
 
-        println!("{}", occ);
-
         let magic_index: u64 = WrappingShr::wrapping_shr(
             &(magic_occ.0), (64 - BISHOP_RELEVANT_BITS[square as usize]) as u32
         );
-        println!("{} {}", square, magic_index);
+
         self.bishop_moves[square as usize][magic_index as usize] = self.bishop_generator.get_full_move(square, occ);
     }
 

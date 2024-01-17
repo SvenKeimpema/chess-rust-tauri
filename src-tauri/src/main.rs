@@ -1,19 +1,16 @@
 // Prevents additional console window on Windows in release, DO NOT REMOVE!!
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
+
 // TODO: move around modules so they make sence!
-#[path = "board/bitboard.rs"] mod bitboard;
-#[path = "pieces/IPiece.rs"] mod piece_interfaces;
-#[path = "pieces/Pawn.rs"] mod pawn;
-#[path = "pieces/Knight.rs"] mod knight;
-#[path = "pieces/King.rs"] mod king;
-#[path = "pieces/Rook.rs"] mod rook;
-#[path = "pieces/Bishop.rs"] mod bishop;
-#[path = "helpers/Random.rs"] mod random;
-#[path = "moves/MoveGenerator.rs"] mod move_gen;
-#[path = "moves/MagicMoves.rs"] mod magic_moves;
-#[path = "board/state.rs"] mod state;
-#[path = "moves/IMove.rs"] mod move_i;
+
+mod pieces;
+mod moves;
+mod helpers;
+mod board;
+mod game;
+
+use crate::game::{Game, GameHandler};
 
 #[tauri::command]
 fn get_board() -> &'static str  {
@@ -30,11 +27,11 @@ fn select_square(square: i8) -> Vec<i8> {
 }
 
 fn main() {
-    let bb: u64 = 0u64;
+    let mut game_handler = Game {..Default::default() };
+    game_handler.init_game();
+    let moves = game_handler.get_moves();
 
-    set_bit!(&bb, 52);
-
-    println!("{}", bb);
+    println!("{}", moves.move_count);
 
     tauri::Builder::default()
         .invoke_handler(tauri::generate_handler![get_board, select_square])

@@ -1,6 +1,6 @@
 pub mod bishop {
-    use crate::piece_interfaces::SlidingPiece;
     use crate::{get_bit, set_bit};
+    use crate::pieces::piece_interfaces::SlidingPiece;
 
     pub struct Bishop {
         pub mask: Vec<u64>
@@ -19,18 +19,17 @@ pub mod bishop {
             let f: i32 = sq % 8;
 
             for (rank, file) in (r+1..7).zip(f+1..7) {
-                attacks = set_bit!(attacks, rank*8+file);
+                set_bit!(&mut attacks, rank*8+file);
             }
             for (rank, file) in (1..r).rev().zip(f+1..7) {
-                attacks = set_bit!(attacks, rank*8+file);
+                set_bit!(&mut attacks, rank*8+file);
             }
             for (rank, file) in (r+1..7).zip((1..f).rev()) {
-                attacks = set_bit!(attacks, rank*8+file);
+                set_bit!(&mut attacks, rank*8+file);
             }
             for (rank, file) in (1..r).rev().zip((1..f).rev()) {
-                attacks = set_bit!(attacks, rank*8+file);
+                set_bit!(&mut attacks, rank*8+file);
             }
-            
 
             return attacks;
         }
@@ -41,19 +40,19 @@ pub mod bishop {
             let f: i32 = sq % 8;
 
             for (rank, file) in (r+1..8).zip(f+1..8) {
-                attacks = set_bit!(attacks, rank*8+file);
+                set_bit!(&mut attacks, rank*8+file);
                 if get_bit!(block, rank*8+file) {break}
             }
             for (rank, file) in (0..r).rev().zip(f+1..8) {
-                attacks = set_bit!(attacks, rank*8+file);
-                if get_bit!(block, rank*8+file) {break}
+                set_bit!(&mut attacks, rank*8+file);
+                if get_bit!(block, rank*8+file) { break }
             }
             for (rank, file) in (r+1..8).zip((0..f).rev()) {
-                attacks = set_bit!(attacks, rank*8+file);
+                set_bit!(&mut attacks, rank*8+file);
                 if get_bit!(block, rank*8+file) {break}
             }
             for (rank, file) in (0..r).rev().zip((0..f).rev()) {
-                attacks = set_bit!(attacks, rank*8+file);
+                set_bit!(&mut attacks, rank*8+file);
                 if get_bit!(block, rank*8+file) {break}
             }
 
