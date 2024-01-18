@@ -1,13 +1,16 @@
 use std::default::Default;
+use tauri::State;
 
 use crate::{clear_bit, get_bit};
-use crate::board::bitboard::math::get_ls1b;
-use crate::moves::magic_moves::{MagicMoves, MagicMovesGenerator};
+use crate::board::bitboard::math::{get_ls1b};
+use crate::board::state::{GameState, GameStateParser};
+use crate::game::Game;
+use crate::moves::magic_moves::{MagicMoves, MagicMovesGenerator, MagicMovesInit};
 use crate::moves::move_interfaces::{AddMove, Moves};
 use crate::pieces::king::King;
 use crate::pieces::knight::Knight;
 use crate::pieces::pawn::pawn::Pawn;
-use crate::board::state::{GameState, GameStateParser};
+use crate::pieces::piece_interfaces::{MultiSideMovingPiece, NonSlidingPiece};
 
 pub struct MoveGenerator {
     pub pawn_generator: Pawn,
@@ -23,6 +26,7 @@ pub trait MoveCalculator {
 trait AllPiecesCalculator {
     fn generate_white_pawn_moves(&mut self, moves: &mut Moves, state: &mut GameState);
     fn generate_black_pawn_moves(&mut self, moves: &mut Moves, state: &mut GameState);
+    fn generate_pawn_capture(&mut self, piece_sq: i32, captures: u64, moves: &mut Moves, state: &mut GameState);
     fn generate_knight_moves(&mut self, moves: &mut Moves, state: &mut GameState);
     fn generate_bishop_moves(&mut self, moves: &mut Moves, state: &mut GameState);
     fn generate_rook_moves(&mut self, moves: &mut Moves, state: &mut GameState);
@@ -37,13 +41,19 @@ impl MoveCalculator for MoveGenerator {
     fn generate_moves(&mut self, state: &mut GameState) -> Moves {
         let mut moves = Moves {..Default::default()};
 
+        // print_bitboard(state.occ[2]);
+
         if state.white_to_move {
             self.generate_white_pawn_moves(&mut moves, state)
         }else {
-            // self.generate_black_pawn_moves(&mut moves, state)
+            self.generate_black_pawn_moves(&mut moves, state)
         }
 
         self.generate_knight_moves(&mut moves, state);
+        self.generate_bishop_moves(&mut moves, state);
+        self.generate_rook_moves(&mut moves, state);
+        self.generate_queen_moves(&mut moves, state);
+        self.generate_king_moves(&mut moves, state);
 
         return moves;
     }
@@ -51,7 +61,7 @@ impl MoveCalculator for MoveGenerator {
 
 impl AllPiecesCalculator for MoveGenerator {
     /// generates moves for all (white)pawns currently on the board
-    fn generate_white_pawn_moves(&mut self, moves: &mut Moves, state: &mut GameState) {
+    fn generate_white_pawn_moves(&mut self, mut moves: &mut Moves, state: &mut GameState) {
         let mut bb: u64 = state.bb[0];
 
         while bb != 0u64 {
@@ -66,14 +76,15 @@ impl AllPiecesCalculator for MoveGenerator {
             }
 
             let captures: u64 = self.pawn_generator.mask[piece_sq as usize][0];
-            self.generate_attacking_moves(piece_sq, captures, moves, state);
+            self.generate_pawn_capture(piece_sq, captures, &mut moves, state);
+
             clear_bit!(&mut bb, piece_sq);
         }
 
     }
 
     /// generates moves for all (black)pawns currently on the board
-    fn generate_black_pawn_moves(&mut self, moves: &mut Moves, state: &mut GameState) {
+    fn generate_black_pawn_moves(&mut self, mut moves: &mut Moves, state: &mut GameState) {
         // all black pawns
         let mut bb: u64 = state.bb[6];
 
@@ -91,19 +102,32 @@ impl AllPiecesCalculator for MoveGenerator {
             }
 
             let captures: u64 = self.pawn_generator.mask[piece_sq as usize][1];
-            self.generate_attacking_moves(piece_sq, captures, moves, state);
+            self.generate_pawn_capture(piece_sq, captures, &mut moves, state);
+
             // remove the pawn in bb so we can goto the next one
             clear_bit!(&mut bb, piece_sq);
         }
     }
 
-    fn generate_knight_moves(&mut self, moves: &mut Moves, state: &mut GameState) {
+    fn generate_pawn_capture(&mut self, piece_sq: i32, mut captures: u64, mut moves: &mut Moves, state: &mut GameState) {
+        while captures != 0u64 {
+            let sq: i32 = get_ls1b(captures) as i32;
+
+            if get_bit!(state.occ[0], sq) {
+                moves.add_move(piece_sq, sq, true, false, false);
+            }
+
+            clear_bit!(&mut captures, sq);
+        }
+    }
+
+    fn generate_knight_moves(&mut self, mut moves: &mut Moves, state: &mut GameState) {
         // knights bb
         let mut bb = if state.white_to_move {state.bb[1]} else {state.bb[7]};
         while bb != 0u64 {
             let knight_sq: i32 = get_ls1b(bb) as i32;
             let knight_moves = self.knight_generator.mask[knight_sq as usize];
-            self.generate_attacking_moves(knight_sq, knight_moves, moves, state);
+            self.generate_attacking_moves(knight_sq, knight_moves, &mut moves, state);
             clear_bit!(&mut bb, knight_sq);
         }
     }
@@ -121,40 +145,40 @@ impl AllPiecesCalculator for MoveGenerator {
         }
     }
 
-    fn generate_rook_moves(&mut self, moves: &mut Moves, state: &mut GameState) {
+    fn generate_rook_moves(&mut self, mut moves: &mut Moves, state: &mut GameState) {
         // bishop bb
         let mut bb = if state.white_to_move {state.bb[3]} else {state.bb[9]};
 
         while bb != 0u64 {
             let rook_sq: i32 = get_ls1b(bb) as i32;
             let rook_moves = self.magic_generator.get_rook_moves(rook_sq, state.occ[2]);
-            self.generate_attacking_moves(rook_sq, rook_moves, moves, state);
+            self.generate_attacking_moves(rook_sq, rook_moves, &mut moves, state);
             clear_bit!(&mut bb, rook_sq);
         }
     }
 
-    fn generate_queen_moves(&mut self, moves: &mut Moves, state: &mut GameState) {
+    fn generate_queen_moves(&mut self, mut moves: &mut Moves, state: &mut GameState) {
         let mut bb: u64 = if state.white_to_move {state.bb[4]} else {state.bb[10]};
         while bb != 0u64 {
             let piece_sq = get_ls1b(bb) as i32;
 
             let bishop_moves = self.magic_generator.get_bishop_moves(piece_sq, state.occ[2]);
-            self.generate_attacking_moves(piece_sq, bishop_moves, moves, state);
+            self.generate_attacking_moves(piece_sq, bishop_moves, &mut moves, state);
 
             let rook_moves = self.magic_generator.get_rook_moves(piece_sq, state.occ[2]);
-            self.generate_attacking_moves(piece_sq, rook_moves, moves, state);
+            self.generate_attacking_moves(piece_sq, rook_moves, &mut moves, state);
 
             clear_bit!(&mut bb, piece_sq);
         }
     }
 
-    fn generate_king_moves(&mut self, moves: &mut Moves, state: &mut GameState) {
+    fn generate_king_moves(&mut self, mut moves: &mut Moves, state: &mut GameState) {
         let mut bb: u64 = if state.white_to_move {state.bb[5]} else {state.bb[11]};
         while bb != 0u64 {
             let piece_sq: i32 = get_ls1b(bb) as i32;
 
             let king_moves: u64 = self.king_generator.mask[piece_sq as usize];
-            self.generate_attacking_moves(piece_sq, king_moves, moves, state);
+            self.generate_attacking_moves(piece_sq, king_moves, &mut moves, state);
 
             clear_bit!(&mut bb, piece_sq);
         }
@@ -166,11 +190,13 @@ impl AllPiecesCalculator for MoveGenerator {
         let occ_idx = state.get_capture_occ_idx();
         while attacking_moves != 0u64 {
             let sq: i32 = get_ls1b(attacking_moves) as i32;
+
             if get_bit!(state.occ[occ_idx as usize], sq) {
                 moves.add_move(start_sq, sq, true, false, false);
             }else if !get_bit!(state.occ[2], sq) {
                 moves.add_move(start_sq, sq, false, false, false);
             }
+
             clear_bit!(&mut attacking_moves, sq);
         }
     }
@@ -178,10 +204,15 @@ impl AllPiecesCalculator for MoveGenerator {
 
 impl Default for MoveGenerator {
     fn default() -> Self {
-        let pawn_generator = Pawn { ..Default::default() };
-        let knight_generator = Knight { ..Default::default() };
-        let king_generator = King { ..Default::default() };
-        let magic_generator = MagicMoves { ..Default::default() };
+        let mut pawn_generator = Pawn { ..Default::default() };
+        let mut knight_generator = Knight { ..Default::default() };
+        let mut king_generator = King { ..Default::default() };
+        let mut magic_generator = MagicMoves { ..Default::default() };
+
+        pawn_generator.init();
+        knight_generator.init();
+        king_generator.init();
+        magic_generator.init();
 
         return Self {
             pawn_generator,

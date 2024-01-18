@@ -1,5 +1,6 @@
 use crate::board::bitboard::constants::{A_FILE, H_FILE};
 use crate::board::bitboard::math::set_bit_not_exists;
+use crate::pieces::piece_interfaces::NonSlidingPiece;
 use crate::set_bit;
 
 pub struct King {

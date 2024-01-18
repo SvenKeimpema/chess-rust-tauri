@@ -1,6 +1,7 @@
 pub mod rook {
     use crate::{get_bit, set_bit};
     use crate::pieces::piece_interfaces::SlidingPiece;
+    use num::range_step;
 
     pub struct Rook {
         pub mask: Vec<u64>
@@ -47,7 +48,7 @@ pub mod rook {
                 set_bit!(&mut moves, rank*8+f);
                 if get_bit!(block, rank*8+f) {break}
             }
-            for rank in (0..r-1).rev() {
+            for rank in range_step(r-1, 0, -1) {
                 set_bit!(&mut moves, rank*8+f);
                 if get_bit!(block, rank*8+f) {break}
             }
@@ -55,7 +56,7 @@ pub mod rook {
                 set_bit!(&mut moves, r*8+file);
                 if get_bit!(block, r*8+file) {break}
             }
-            for file in (0..f-1).rev() {
+            for file in range_step(f-1, 0, -1) {
                 set_bit!(&mut moves, r*8+file);
                 if get_bit!(block, r*8+file) {break}
             }

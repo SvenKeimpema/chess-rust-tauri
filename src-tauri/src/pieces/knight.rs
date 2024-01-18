@@ -21,6 +21,7 @@ impl NonSlidingPiece for Knight {
             self.mask[sq] = self.get_mask(sq as i32);
         }
     }
+
     fn get_mask(&mut self, sq: i32) -> u64 {
         let mut attacks: u64 = 0u64;
 

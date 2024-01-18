@@ -58,7 +58,7 @@ impl GameStateParser for GameState {
         }
 
         for i in 6..12 {
-            self.occ[1] = self.bb[i];
+            self.occ[1] |= self.bb[i];
         }
 
         self.occ[2] = self.occ[0] | self.occ[1];

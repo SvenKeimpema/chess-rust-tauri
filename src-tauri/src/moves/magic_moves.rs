@@ -169,9 +169,7 @@ impl MagicMovesInit for MagicMoves {
         for sq in 0..64 {
             self.bishop_magic[sq as usize] =
                 self.generate_magic_num(sq, BISHOP_RELEVANT_BITS[sq as usize] as i32, true);
-        }
 
-        for sq in 0..64 {
             self.rook_magic[sq as usize] =
                 self.generate_magic_num(sq, ROOK_RELEVANT_BITS[sq as usize] as i32, false);
         }

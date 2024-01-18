@@ -51,7 +51,7 @@ pub mod math {
        };
     }
 
-
+    ///sets the bit on a square if it doesn't exists on the mask
     pub(crate) fn set_bit_not_exists(mut bb: u64, mask: u64, sq: i32) -> u64 {
         if sq < 64 && !get_bit!(mask, sq) {
             set_bit!(&mut bb, sq);
