@@ -1,6 +1,8 @@
 pub mod math {
     use crate::board::bitboard::constants::{DEBRUIJ_T, DEBRUIJ_M};
 
+    /// sets the bit on a bitboard for example:
+    /// bb=0000, sq=1 => 0100(sq starts by 0)
     #[macro_export]
     macro_rules! set_bit {
         ($bb:expr, $sq:expr) => {
@@ -17,6 +19,8 @@ pub mod math {
         };
     }
 
+    /// returns true if a bit is one on the given square. for example:
+    /// bb=0100, sq=1 => true because the first bit equals one(sq starts by 0)
     #[macro_export]
     macro_rules! get_bit {
         ($bb:expr, $sq:expr) => {
@@ -35,6 +39,10 @@ pub mod math {
         };
     }
 
+    /// clears or set's a bit on any given square. for example:\
+    /// <br>bb=0100, sq=1 => 0000 because the first bit equals one(sq starts by 0)\
+    /// <br>NOTE: only use this function whenever you are sure there is a bit set to one on said square.\
+    /// <br>if you don't do this it might do undefined behaviour.
     #[macro_export]
     macro_rules! clear_bit {
        ($bb:expr, $sq:expr) => {

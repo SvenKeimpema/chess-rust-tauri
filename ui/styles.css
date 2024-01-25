@@ -1,13 +1,32 @@
+/*sizeof chess_board*/
 #chess_board {
   display: grid;
   grid-template-columns: repeat(8, 1fr);
   grid-template-rows: repeat(8, 1fr);
-  width: 800px;
-  height: 800px;
+  width: 100%;
+  height: 100%;
 }
 
+/*every square needs this css*/
 .square {
   border-style: solid;
   width: 100%;
   height: 100%;
+}
+
+/*gives the user the ability to see where the piece can move to*/
+.movable {
+  /*we will need to override all other background color's*/
+  background-color: red !important;
+}
+
+/*text for people who win the game, only show ofc when the game is won*/
+#winner-text{
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  font-size: 50px;
+  color: red;
+  transform: translate(-50%,-50%);
+  -ms-transform: translate(-50%,-50%);
 }

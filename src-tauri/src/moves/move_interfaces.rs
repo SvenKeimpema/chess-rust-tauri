@@ -1,10 +1,13 @@
+#[derive(Copy)]
 pub struct Move {
     pub src: i32,
     pub dest: i32,
+    pub piece_type: i32,
     pub capture: bool,
     pub castle: bool,
     pub en_passant: bool,
 }
+
 impl Clone for Move {
     fn clone(&self) -> Self {
         Self {
@@ -17,11 +20,11 @@ impl Clone for Move {
 /// move_count: total amount of non-empty Move in Vec<Move>
 pub struct Moves {
     pub moves: Vec<Move>,
-    pub move_count: i32,
 }
 
 pub trait AddMove {
-    fn add_move(&mut self, src: i32, dest: i32, capture: bool, castle: bool, en_passant: bool);
+    fn add_move(&mut self, src: i32, dest: i32, piece_type: i32, capture: bool, castle: bool, en_passant: bool);
+    fn add_move_class(&mut self, chess_move: &Move);
 }
 
 impl Default for Move {
@@ -29,6 +32,7 @@ impl Default for Move {
         return Self {
             src: -1,
             dest: -1,
+            piece_type: -1,
             capture: false,
             castle: false,
             en_passant: false,
@@ -38,17 +42,18 @@ impl Default for Move {
 
 impl Default for Moves {
     fn default() -> Self {
-        let mov = Move { ..Default::default() };
         return Self {
-            moves: vec![mov; 256],
-            move_count: 0,
+            moves: vec![],
         };
     }
 }
 
 impl AddMove for Moves {
-    fn add_move(&mut self, src: i32, dest: i32, capture: bool, castle: bool, en_passant: bool) {
-        self.moves[self.move_count as usize] = Move { src, dest, capture, castle, en_passant };
-        self.move_count += 1;
+    fn add_move(&mut self, src: i32, dest: i32, piece_type: i32, capture: bool, castle: bool, en_passant: bool) {
+        self.moves.push(Move { src, dest, piece_type, capture, castle, en_passant });
+    }
+
+    fn add_move_class(&mut self, chess_move: &Move) {
+        self.moves.push(chess_move.clone());
     }
 }

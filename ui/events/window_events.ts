@@ -1,20 +1,49 @@
 import {requests} from "../requests/tauri_requests";
+import {resolve} from "@tauri-apps/api/types/path";
 
 let Requests = new requests();
 
 export class window_events {
+    last_click: number = -1;
+
     /*
     calculates which square the user has clicked based on mouseEvent
+    Note this function should only be performed when the user clicked inside the square.
      */
     square_clicked(event: MouseEvent) {
-        // 100 is in this case the size of the screen / 8
-        // TODO make 100 not hardcoded and based on the screen_size
-        return Math.floor(event.y/100)*8+Math.floor(event.x/100)
+        // the size of the chess_board doesn't matter the only thing that matters is that we do /8 for screen
+        // width/height. This is because there are 8 squares on a chess_board(total amount of square may not increase
+        // without changing this code)
+        let chess_board = document.getElementById("chess_board");
+        let square_width = event.x / (chess_board.offsetWidth / 8);
+        let square_height = event.y / (chess_board.offsetHeight / 8);
+
+        return Math.floor(square_height) * 8 + Math.floor(square_width)
+    }
+
+    keydown_event() {
+        window.onkeydown = (event: KeyboardEvent) => {
+            if(event.key.toLowerCase() == "z") {
+                Requests.undo_move();
+            }
+        }
     }
 
     setup_events() {
         window.onclick = (event: MouseEvent) => {
-            Requests.square_clicked_request(this.square_clicked(event));
+            let square_clicked: number = this.square_clicked(event);
+            let chess_squares = document.getElementsByClassName("square")
+
+            if (chess_squares[square_clicked].classList.contains("movable")) {
+                Requests.move_piece_request(this.last_click, square_clicked)
+                this.last_click = -1;
+                return
+            }
+
+            this.last_click = square_clicked;
+            Requests.square_clicked_request(square_clicked);
         };
+
+        this.keydown_event();
     }
 }

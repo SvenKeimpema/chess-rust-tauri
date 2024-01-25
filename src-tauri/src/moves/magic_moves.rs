@@ -4,12 +4,14 @@ https://www.chessprogramming.net/generating-magic-multipliers/
  */
 
 use std::num::Wrapping;
+
+use num_traits::WrappingShr;
+
 use crate::board::bitboard::constants::{BISHOP_RELEVANT_BITS, ROOK_RELEVANT_BITS};
 use crate::board::bitboard::math::set_occ;
-use crate::pieces::piece_interfaces::SlidingPiece;
 use crate::helpers::random::generate_magic_number;
-use num_traits::WrappingShr;
 use crate::pieces::bishop::bishop::Bishop;
+use crate::pieces::piece_interfaces::SlidingPiece;
 use crate::pieces::rook::rook::Rook;
 
 pub struct MagicMoves {

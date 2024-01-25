@@ -1,5 +1,6 @@
 pub mod bishop {
     use num::range_step;
+
     use crate::{get_bit, set_bit};
     use crate::pieces::piece_interfaces::SlidingPiece;
 
@@ -44,15 +45,15 @@ pub mod bishop {
                 set_bit!(&mut attacks, rank*8+file);
                 if get_bit!(block, rank*8+file) {break}
             }
-            for (rank, file) in range_step(0, r-1, -1).zip(f+1..8) {
+            for (rank, file) in range_step(r-1, -1, -1).zip(f+1..8) {
                 set_bit!(&mut attacks, rank*8+file);
                 if get_bit!(block, rank*8+file) { break }
             }
-            for (rank, file) in (r+1..8).zip(range_step(0, f-1, -1)) {
+            for (rank, file) in (r+1..8).zip(range_step(f-1, -1, -1)) {
                 set_bit!(&mut attacks, rank*8+file);
                 if get_bit!(block, rank*8+file) {break}
             }
-            for (rank, file) in range_step(0, r-1, -1).zip(range_step(0, f-1, -1)) {
+            for (rank, file) in range_step(r-1, -1, -1).zip(range_step(f-1, -1, -1)) {
                 set_bit!(&mut attacks, rank*8+file);
                 if get_bit!(block, rank*8+file) {break}
             }
