@@ -21,6 +21,8 @@ mod game;
 
 pub struct GameState(pub Mutex<Game>);
 
+/// if the front-end calls this command we will want to return the starting fen
+/// https://nl.wikipedia.org/wiki/Forsyth-Edwards_Notation
 #[tauri::command]
 fn get_board(state: tauri::State<GameState>) -> String {
     let state_guard: MutexGuard<Game> = state.0.lock().unwrap();
@@ -28,6 +30,7 @@ fn get_board(state: tauri::State<GameState>) -> String {
     return state_guard.default_fen.clone();
 }
 
+/// if a square is pressed on the front-end return all moves so we can display them on the front-end
 #[tauri::command]
 fn select_square(square: i32, state: tauri::State<GameState>) -> Vec<i32> {
     let mut state_guard: MutexGuard<Game> = state.0.lock().unwrap();
@@ -46,6 +49,8 @@ fn select_square(square: i32, state: tauri::State<GameState>) -> Vec<i32> {
     vec
 }
 
+/// moves a piece on the rust side(will also check if the move is valid).
+/// only call this for users not if you are using ai(algorithm) because this is really slow!
 #[tauri::command]
 fn move_piece(start_sq: i32, dest_sq: i32, state: tauri::State<GameState>) {
     let mut state_guard: MutexGuard<Game> = state.0.lock().unwrap();
@@ -73,6 +78,7 @@ fn undo_move(state: tauri::State<GameState>) -> Vec<i32> {
     }
 
     // get difference in occupancies
+    // idea behind this is if we XOR the prev and curr occ[2] we will find a made chess_move
     let occ_copy = state_guard.game_state.occ[2];
     state_guard.game_state.undo_state();
     let occ_diff = occ_copy ^ state_guard.game_state.occ[2];
@@ -83,7 +89,7 @@ fn undo_move(state: tauri::State<GameState>) -> Vec<i32> {
 
 /// returns a code -1 if the game isn't over, 0 if it is a draw, 1 if the game is won
 #[tauri::command]
-fn game_won(state: tauri::State<GameState>) -> i32{
+fn check_game_won(state: tauri::State<GameState>) -> i32{
     let mut state_guard: MutexGuard<Game> = state.0.lock().unwrap();
     let unvalidated_moves: Moves = state_guard.get_moves();
 
@@ -116,7 +122,7 @@ fn main() {
 
     tauri::Builder::default()
         .manage(app_state)
-        .invoke_handler(tauri::generate_handler![get_board, select_square, move_piece, undo_move, game_won])
+        .invoke_handler(tauri::generate_handler![get_board, select_square, move_piece, undo_move, check_game_won])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }

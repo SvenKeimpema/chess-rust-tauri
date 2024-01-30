@@ -43,35 +43,41 @@ impl Default for Game {
 }
 
 impl GameHandler for Game {
+    /// initializes game with default_fen
     fn init_game(&mut self) {
         self.game_state.parse_fen(&self.default_fen);
     }
 
+    /// generates and returns all moves(maybe not legal move!)
     fn get_moves(&mut self) -> Moves {
         return self.move_generator.generate_moves(&mut self.game_state);
     }
 
+    /// move a piece on the chess_board
     fn move_piece(&mut self, chess_move: Move) {
         make_move(&chess_move, &mut self.game_state)
     }
 
+    /// go's over move vec so we TODO
     fn validate_moves(&mut self, unvalidated_moves: Moves) -> Moves{
         validate_moves(unvalidated_moves, &mut self.move_generator, &mut self.game_state)
     }
 
+    /// translates the bb to 2 square indexes so we now the start_square, and end_square
     fn move_made_in_diff(&mut self, mut occ_diff: u64, start_square: i32) -> Vec<i32> {
         let mut move_squares: Vec<i32> = vec![];
 
+        // loop over occ_diff and push all bits set
         while occ_diff != 0u64 {
             let ls1sq: u64 = get_ls1b(occ_diff);
             move_squares.push(ls1sq as i32);
             clear_bit!(&mut occ_diff, ls1sq);
         }
 
+        // we want to return end_sqaure -> start_square to undo a move
         if *move_squares.get(0).unwrap() == start_square {
             move_squares.reverse();
         }
-
 
         return move_squares;
     }

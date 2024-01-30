@@ -1,14 +1,13 @@
 {
   "compilerOptions": {
-    "target": "es6",
+    "target": "es2020",
     "useDefineForClassFields": true,
     "module": "ESNext",
     "lib": [
-      "es6",
-      "es2016",
+      "es2020",
       "dom"
     ],
-    "skipLibCheck": true,
+    "skipLibCheck": false,
 
     /* Bundler mode */
     "moduleResolution": "bundler",
@@ -27,6 +26,6 @@
     "noFallthroughCasesInSwitch": true
   },
   "include": [
-    "src"
+    "ui"
   ]
 }

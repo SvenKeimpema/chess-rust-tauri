@@ -13,4 +13,4 @@ async function main() {
     WindowEvents.setup_events();
 }
 
-await main();
+main().then(() => console.log("setup done."));

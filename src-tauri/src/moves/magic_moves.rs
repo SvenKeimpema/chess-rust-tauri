@@ -1,5 +1,7 @@
 /*
-Most of the calculations here come from https://www.chessprogramming.org/Magic_Bitboards#How_it_works and
+references:
+https://www.chessprogramming.org/Looking_for_Magics
+https://www.chessprogramming.org/Magic_Bitboards#How_it_works (based on plain implementation)
 https://www.chessprogramming.net/generating-magic-multipliers/
  */
 
@@ -75,6 +77,7 @@ impl MagicMovesGenerator for MagicMoves {
             { self.bishop_generator.get_full_move(sq, occ[idx as usize]) } else { self.rook_generator.get_full_move(sq, occ[idx as usize]) }
         }
 
+        // max amount of loops we need to do until we find the magic num
         for _ in 0..1000000 {
             // TODO: speedup used_attacks initialization if possible
             let mut used_attacks: Vec<u64> = vec![0u64; 4096];
@@ -83,23 +86,30 @@ impl MagicMovesGenerator for MagicMoves {
             let magic_number: u64 = generate_magic_number();
             let magic_attack: Wrapping<u64> = Wrapping(attack_mask) * Wrapping(magic_number);
 
+            // if magic_attack.count_ones > 6 we can always continue because it will always fail!
             if (magic_attack.0 & 0xFF00000000000000u64).count_ones() > 6 { continue; }
 
             let mut fail: bool = false;
 
+            // Loop through indices from 0 to occ_idx
             for index in 0..occ_idx {
                 let magic_occ = Wrapping(occ[index as usize]) * Wrapping(magic_number);
                 let magic_index: usize = WrappingShr::wrapping_shr(&(magic_occ.0), (64 - relevant_bits) as u32)
                     as usize;
 
+                // Check if there is a move stored at the magic index
                 if used_attacks[magic_index] == 0u64 {
-                    used_attacks[magic_index] = attacks[index as usize]
-                } else if used_attacks[magic_index] != attacks[index as usize] {
+                    used_attacks[magic_index] = attacks[index as usize];
+                }
+                // if there is a move stored at the magic index it may NOT be different to the move we have currently picked
+                else if used_attacks[magic_index] != attacks[index as usize] {
                     fail = true;
                     break;
                 }
             }
 
+
+            // if the for loop above was successful we can return magic number
             if !fail {
                 return magic_number;
             }
@@ -109,6 +119,8 @@ impl MagicMovesGenerator for MagicMoves {
         return 0u64;
     }
 
+    /// generates moves with all occupancies so we can just lookup the move with the occ without having to generate it
+    /// at the start of this file are most links on how the math behind this works!
     fn generate_magic_moves(&mut self, gen_bishop: bool) {
         for sq in 0..64 {
             let mask: u64 = if gen_bishop {self.bishop_generator.get_mask(sq)} else
@@ -117,6 +129,7 @@ impl MagicMovesGenerator for MagicMoves {
             let relevant_total_bits: u32 = mask.count_ones();
             let occ_bits = 1u32 << relevant_total_bits;
 
+            // loop over all possible occ
             for idx in 0..occ_bits {
                 if gen_bishop {self.generate_magic_bishop(mask, relevant_total_bits, sq, idx as i32)} else
                               {self.generate_magic_rook(mask, relevant_total_bits, sq, idx as i32)}
@@ -124,6 +137,7 @@ impl MagicMovesGenerator for MagicMoves {
         }
     }
 
+    /// generates the bishop move for the magic index
     fn generate_magic_bishop(&mut self, mask: u64, relevant_total_bits: u32, square: i32, idx: i32) {
         let occ: u64 = set_occ(mask, relevant_total_bits as u64, idx as u64);
         let magic_occ = Wrapping(occ) * Wrapping(self.bishop_magic[square as usize]);
@@ -135,6 +149,7 @@ impl MagicMovesGenerator for MagicMoves {
         self.bishop_moves[square as usize][magic_index as usize] = self.bishop_generator.get_full_move(square, occ);
     }
 
+    /// generates the rook move for the magic index
     fn generate_magic_rook(&mut self, mask: u64, relevant_total_bits: u32, square: i32, idx: i32) {
         let occ: u64 = set_occ(mask, relevant_total_bits as u64, idx as u64);
         let magic_occ = Wrapping(occ) * Wrapping(self.rook_magic[square as usize]);

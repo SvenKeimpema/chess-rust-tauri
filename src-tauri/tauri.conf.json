@@ -2,8 +2,8 @@
   "build": {
     "beforeDevCommand": "npm run dev",
     "beforeBuildCommand": "npm run build",
-    "devPath": "http://localhost:8000/ui/index.html",
-    "distDir": "../ui",
+    "devPath": "http://localhost:8000/index.html",
+    "distDir": "../dist",
     "withGlobalTauri": true
   },
   "package": {
@@ -21,7 +21,7 @@
     "bundle": {
       "active": true,
       "targets": "all",
-      "identifier": "com.tauri.dev",
+      "identifier": "com.sven.keimp.dev",
       "icon": [
         "icons/32x32.png",
         "icons/128x128.png",
@@ -36,7 +36,7 @@
     "windows": [
       {
         "fullscreen": false,
-        "resizable": false,
+        "resizable": true,
         "title": "chess",
         "width": 800,
         "height": 800

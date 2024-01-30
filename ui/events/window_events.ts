@@ -1,5 +1,4 @@
 import {requests} from "../requests/tauri_requests";
-import {resolve} from "@tauri-apps/api/types/path";
 
 let Requests = new requests();
 
@@ -15,13 +14,17 @@ export class window_events {
         // width/height. This is because there are 8 squares on a chess_board(total amount of square may not increase
         // without changing this code)
         let chess_board = document.getElementById("chess_board");
+
+        if(chess_board === null) return;
+
         let square_width = event.x / (chess_board.offsetWidth / 8);
         let square_height = event.y / (chess_board.offsetHeight / 8);
 
         return Math.floor(square_height) * 8 + Math.floor(square_width)
     }
 
-    keydown_event() {
+    // if the key `z` has been pressed we want to undo a move
+    init_keydown_event() {
         window.onkeydown = (event: KeyboardEvent) => {
             if(event.key.toLowerCase() == "z") {
                 Requests.undo_move();
@@ -29,10 +32,12 @@ export class window_events {
         }
     }
 
-    setup_events() {
+    init_square_clicked_event() {
         window.onclick = (event: MouseEvent) => {
-            let square_clicked: number = this.square_clicked(event);
+            let square_clicked: number | undefined = this.square_clicked(event);
             let chess_squares = document.getElementsByClassName("square")
+
+            if(square_clicked === undefined) return;
 
             if (chess_squares[square_clicked].classList.contains("movable")) {
                 Requests.move_piece_request(this.last_click, square_clicked)
@@ -43,7 +48,11 @@ export class window_events {
             this.last_click = square_clicked;
             Requests.square_clicked_request(square_clicked);
         };
+    }
 
-        this.keydown_event();
+    //sets up all events
+    setup_events() {
+        this.init_square_clicked_event();
+        this.init_keydown_event();
     }
 }

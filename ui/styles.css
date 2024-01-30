@@ -20,11 +20,25 @@
   background-color: red !important;
 }
 
-/*text for people who win the game, only show ofc when the game is won*/
-#winner-text{
+#display-block {
   position: absolute;
-  top: 50%;
-  left: 50%;
+  left: calc(50% - 20vw);
+  top: calc(50% - 20vh);
+
+  background-color: darkgray !important;
+  opacity: 0.5;
+  z-index: 1;
+  width: 50vw;
+  height: 50vh;
+}
+
+/*text for people who win the game, only show ofc when the game is won*/
+#game-ended-text{
+  width: 100%;
+  height: 100%;
+  text-align: center;
+
+  opacity: initial;
   font-size: 50px;
   color: red;
   transform: translate(-50%,-50%);

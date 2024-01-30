@@ -36,11 +36,13 @@ impl Default for GameState {
 }
 
 impl GameStateParser for GameState {
-    // returns which side needs to be check if there is a piece
+    /// returns which side needs to be check if there is a piece
     fn get_capture_occ_idx(&mut self) -> i32 {
         return if self.white_to_move { 1 } else { 0 };
     }
 
+    /// parses fen based on(Forsyth-Edwards Notation)
+    /// https://nl.wikipedia.org/wiki/Forsyth-Edwards_Notation
     fn parse_fen(&mut self, fen: &String) {
         let mut board_index: u32 = 0;
 
@@ -103,6 +105,7 @@ impl GameStateParser for GameState {
         self.update_occ();
     }
 
+    /// updates the occ based on the current bitboard state
     fn update_occ(&mut self) {
         self.occ[0] = 0u64;
         self.occ[1] = 0u64;
@@ -119,6 +122,7 @@ impl GameStateParser for GameState {
         self.occ[2] = self.occ[0] | self.occ[1];
     }
 
+    /// saves the current game state
     fn save_state(&mut self) {
         self.saved_states.push(SaveState {
             bb: self.bb.clone(),
@@ -127,6 +131,7 @@ impl GameStateParser for GameState {
         });
     }
 
+    ///goes back to a previous state(UNSAFE! doesn't check if there is a save_state due to performance reasons(10% speedup))
     fn undo_state(&mut self) {
         let saved_state: SaveState = self.saved_states.pop().unwrap();
         self.bb = saved_state.bb;
