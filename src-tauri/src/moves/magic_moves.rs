@@ -79,7 +79,6 @@ impl MagicMovesGenerator for MagicMoves {
 
         // max amount of loops we need to do until we find the magic num
         for _ in 0..1000000 {
-            // TODO: speedup used_attacks initialization if possible
             let mut used_attacks: Vec<u64> = vec![0u64; 4096];
 
             // generate a fully random magic number(it's just a ph

@@ -1,9 +1,6 @@
 // Prevents additional console window on Windows in release, DO NOT REMOVE!!
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
-
-// TODO: move around modules so they make sence!
-
 use std::sync::{Mutex, MutexGuard};
 use crate::board::bitboard::math::get_ls1b;
 

@@ -58,7 +58,7 @@ impl GameHandler for Game {
         make_move(&chess_move, &mut self.game_state)
     }
 
-    /// go's over move vec so we TODO
+    /// returns all legal moves allowed to be made by a user
     fn validate_moves(&mut self, unvalidated_moves: Moves) -> Moves{
         validate_moves(unvalidated_moves, &mut self.move_generator, &mut self.game_state)
     }

@@ -93,7 +93,6 @@ export class chess_board {
 
 
     /*
-    TODO: make it so that this can also undo captures
     <br><br><br> params:
     <br>start_sq: square where the piece is currently on.
     <br>end_sq: square where the piece needs to go.

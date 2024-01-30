@@ -1,4 +1,3 @@
-// TODO: make this OOP!
 import {requests} from "./requests/tauri_requests";
 import {fen_helper} from "./fen_helper";
 import {window_events} from "./events/window_events";
