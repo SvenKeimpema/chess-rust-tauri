@@ -24,23 +24,22 @@
   position: absolute;
   left: calc(50% - 20vw);
   top: calc(50% - 20vh);
-
   background-color: darkgray !important;
   opacity: 0.5;
-  z-index: 1;
   width: 50vw;
   height: 50vh;
 }
 
 /*text for people who win the game, only show ofc when the game is won*/
 #game-ended-text{
-  width: 100%;
-  height: 100%;
+  position: absolute;
+  z-index: 100;
   text-align: center;
 
-  opacity: initial;
   font-size: 50px;
   color: red;
+  left: 50vw;
+  top: 50vh;
   transform: translate(-50%,-50%);
   -ms-transform: translate(-50%,-50%);
 }

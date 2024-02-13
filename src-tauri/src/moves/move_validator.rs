@@ -1,4 +1,4 @@
-use crate::board::state::{GameState, GameStateParser};
+use crate::board::state::{ChessGameState, GameStateParser};
 use crate::moves::move_generator::{MoveCalculator, MoveGenerator};
 use crate::moves::move_interfaces::{AddMove, Moves};
 use crate::moves::move_maker::make_move;
@@ -7,7 +7,7 @@ use crate::moves::move_maker::make_move;
 pub fn validate_moves(
     unvalidated_moves: Moves,
     move_generator: &mut MoveGenerator,
-    game_state: &mut GameState
+    game_state: &mut ChessGameState
 ) -> Moves {
     let mut valid_moves = Moves { ..Default::default() };
 
@@ -27,7 +27,7 @@ pub fn validate_moves(
 }
 
 /// returns true if the king of the opponent player is alive after every move is made.
-pub fn king_alive_after_moves(game_state: &mut GameState, m: Moves) -> bool{
+pub fn king_alive_after_moves(game_state: &mut ChessGameState, m: Moves) -> bool{
     let king_side: usize = if game_state.white_to_move { 11 } else { 5 };
 
     // loops over every move and makes it, after it will check if it's still on the bb. if not return false

@@ -1,0 +1,4 @@
+In deze module heb ik een schaak programma gemaakt met behulp van magic bitboards en tauri.
+
+Keybinds van programma:
+key: 'z' -> ongedaan maken van een beweging/zet

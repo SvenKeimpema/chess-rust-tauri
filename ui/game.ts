@@ -12,11 +12,15 @@ export class Game {
 
         switch (code) {
             case 0:
-                game_ended_text_label.innerHTML = "Game has been drawn";
+                game_ended_text_label.innerHTML = "Game has been drawn!";
                 game_ended_text_label.style.display = "block";
                 break;
             case 1:
-                game_ended_text_label.innerHTML = "You Won!";
+                game_ended_text_label.innerHTML = "White Won!";
+                game_ended_text_label.style.display = "block";
+                break;
+            case 2:
+                game_ended_text_label.innerHTML = "Black Won!";
                 game_ended_text_label.style.display = "block";
                 break;
             default:

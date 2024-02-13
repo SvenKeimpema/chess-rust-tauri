@@ -9,7 +9,7 @@ use std::num::Wrapping;
 
 use num_traits::WrappingShr;
 
-use crate::board::bitboard::constants::{BISHOP_RELEVANT_BITS, ROOK_RELEVANT_BITS};
+use crate::board::bitboard::constants::{BISHOP_MAGIC, BISHOP_RELEVANT_BITS, ROOK_MAGIC, ROOK_RELEVANT_BITS};
 use crate::board::bitboard::math::set_occ;
 use crate::helpers::random::generate_magic_number;
 use crate::pieces::bishop::bishop::Bishop;
@@ -53,8 +53,8 @@ impl Default for MagicMoves {
         return Self {
             bishop_moves: vec![vec![0u64; 512]; 64],
             rook_moves: vec![vec![0u64; 4096]; 64],
-            bishop_magic: vec![0u64; 64],
-            rook_magic: vec![0u64; 64],
+            bishop_magic: Vec::from(BISHOP_MAGIC),
+            rook_magic: Vec::from(ROOK_MAGIC),
             bishop_generator: bishop,
             rook_generator: rook,
         };
@@ -182,14 +182,16 @@ impl MagicMovesGenerator for MagicMoves {
 impl MagicMovesInit for MagicMoves {
     /// initializes magic nums for bishop and rook
     fn init(&mut self) {
-        for sq in 0..64 {
-            self.bishop_magic[sq as usize] =
-                self.generate_magic_num(sq, BISHOP_RELEVANT_BITS[sq as usize] as i32, true);
-
-            self.rook_magic[sq as usize] =
-                self.generate_magic_num(sq, ROOK_RELEVANT_BITS[sq as usize] as i32, false);
-        }
-
+        // we do not always want to generate magic_moves due to it having the possibility of generating magic
+        // magic numbers
+        // for sq in 0..64 {
+        //     self.bishop_magic[sq as usize] =
+        //         self.generate_magic_num(sq, BISHOP_RELEVANT_BITS[sq as usize] as i32, true);
+        //
+        //     self.rook_magic[sq as usize] =
+        //         self.generate_magic_num(sq, ROOK_RELEVANT_BITS[sq as usize] as i32, false);
+        //
+        // }
         self.generate_magic_moves(true);
         self.generate_magic_moves(false);
     }

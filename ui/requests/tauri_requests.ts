@@ -31,10 +31,16 @@ export class requests {
         new Promise<void>((resolve, reject) => {
             invoke("undo_move", {}).then((move: unknown) => {
                 let arr_move = move as Array<number>;
-                let start = arr_move[0], dest = arr_move[1];
+                // start is the current square the piece is currently on
+                // end square is where the piece needs to go to undo the move
+                let start: number = arr_move[0], dest: number = arr_move[1];
+
+                // we might need the previous piece that was on start_square_piece due to it being captured and forgotten
+                // on the front-end
+                let start_square_piece: number = arr_move[2];
 
                 chess_board.unset_movable_squares();
-                chess_board.undo_move(start, dest);
+                chess_board.undo_move(start, dest, start_square_piece);
                 resolve();
             }).catch(reject);
         })

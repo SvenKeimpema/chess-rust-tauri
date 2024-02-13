@@ -14,7 +14,7 @@ export class chess_board {
         return Math.floor((c+r) % 2) == 0 ? "darkgrey" : "white"
     }
 
-    static create_empty_square(id: number) {
+    static create_empty_square(id: number): HTMLDivElement {
         /*
         Creates a chess square with no piece on it
          */
@@ -25,7 +25,7 @@ export class chess_board {
         return empty_div
     }
 
-    static add_empty_squares(x: number, id: number) {
+    static add_empty_squares(x: number, id: number): void {
         /*
         creates multiple chess squares.
         <br>x -> amount
@@ -42,14 +42,20 @@ export class chess_board {
         }
     }
 
-    static add_piece(piece: string, id: number) {
-        // Create a chess square with a piece on it
-
+    static generate_piece_element(piece: string, id: number): HTMLImageElement {
         let img = document.createElement('img');
         img.src = "ui/assets/" + piece + ".png";
         img.classList.add('square');
         img.id = id.toString();
         img.style.backgroundColor = this.get_color(id);
+
+        return img;
+    }
+
+    static add_piece(piece: string, id: number): void {
+        // Create a chess square with a piece on it
+        let img: HTMLImageElement = this.generate_piece_element(piece, id);
+
 
         if(chess_board.html_chess_board === null) return;
 
@@ -65,18 +71,18 @@ export class chess_board {
         }
     }
 
-    static set_squares_movable(moves: Array<number>) {
-        let squares = document.getElementsByClassName('square')
+    static set_squares_movable(moves: Array<number>): void {
+        let squares: HTMLCollectionOf<Element> = document.getElementsByClassName('square')
 
-        moves.forEach( (move: number) => {
+        moves.forEach( (move: number): void => {
             squares[move].classList.add('movable')
         })
     }
 
-    static move_piece(start_sq: number, end_sq: number) {
-        let squares = document.getElementsByClassName('square');
-        let chess_board = document.getElementById('chess_board');
-        let empty_div = this.create_empty_square(start_sq);
+    static move_piece(start_sq: number, end_sq: number): void {
+        let squares: HTMLCollectionOf<Element> = document.getElementsByClassName('square');
+        let chess_board: HTMLElement | null = document.getElementById('chess_board');
+        let empty_div: HTMLDivElement = this.create_empty_square(start_sq);
 
         if(chess_board === null) return;
 
@@ -96,10 +102,26 @@ export class chess_board {
     <br><br><br> params:
     <br>start_sq: square where the piece is currently on.
     <br>end_sq: square where the piece needs to go.
+    <br>start_sq_piece: piece that was on the start_sq.
     */
-    static undo_move(start_sq: number, end_sq: number): void {
+    static undo_move(start_sq: number, end_sq: number, start_sq_piece: number): void {
         if(start_sq == end_sq) return;
-
         this.move_piece(start_sq, end_sq);
+
+        if(start_sq_piece === -1) return;
+        // piece int to string
+        let piece: string = "PNBRQKpnbrqk".charAt(start_sq_piece);
+        piece = (piece.toUpperCase() == piece ? "w" : "b") + piece.toUpperCase();
+
+        let chess_board: HTMLElement | null = document.getElementById('chess_board');
+        let squares: HTMLCollectionOf<Element> = document.getElementsByClassName('square');
+        let new_piece_image: HTMLImageElement =
+            this.generate_piece_element(piece, start_sq);
+
+        if(chess_board === null) return;
+        console.log(squares[start_sq]);
+        chess_board.removeChild(squares[start_sq]);
+        chess_board.children[start_sq-1].insertAdjacentElement("afterend", new_piece_image);
+
     }
 }

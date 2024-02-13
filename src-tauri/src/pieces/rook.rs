@@ -23,13 +23,13 @@ pub mod rook {
             for rank in r..7 {
                 set_bit!(&mut moves, rank*8+f);
             }
-            for rank in (1..r).rev() {
+            for rank in range_step(r-1, 0, -1) {
                 set_bit!(&mut moves, rank*8+f);
             }
             for file in f..7 {
                 set_bit!(&mut moves, r*8+file);
             }
-            for file in (1..f).rev() {
+            for file in range_step(f-1, 0, -1) {
                 set_bit!(&mut moves, r*8+file);
             }
 

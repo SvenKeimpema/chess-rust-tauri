@@ -19,7 +19,7 @@ pub unsafe fn get_random_u32_number() -> u32 {
 }
 
 /// generates a fast pseudo random u64 number based on 4 pseudo random u32 numbers
-/// we use the first 16 bits of the u32 number to unsure it randomness
+/// we use the first 16 bits of the u32 number to unsure its randomness
 pub unsafe fn get_random_u64_number() -> u64 {
     let (n1, n2, n3, n4): (u64, u64, u64, u64);
 

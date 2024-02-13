@@ -1,9 +1,9 @@
-use crate::board::state::{GameState, GameStateParser};
+use crate::board::state::{ChessGameState, GameStateParser};
 use crate::{clear_bit, get_bit, set_bit};
 use crate::moves::move_interfaces::Move;
 
 /// make a move on the chess board
-pub fn make_move(chess_move: &Move, game_state: &mut GameState) {
+pub fn make_move(chess_move: &Move, game_state: &mut ChessGameState) {
     game_state.save_state();
     let start_opponent_pieces: usize = if game_state.white_to_move { 6 } else { 0 };
     let end_oppenent_pieces: usize = if game_state.white_to_move { 12 } else { 6 };

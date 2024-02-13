@@ -1,19 +1,19 @@
+use crate::{clear_bit, get_bit};
 use crate::board::bitboard::math::get_ls1b;
-use crate::board::state::{GameState, GameStateParser};
-use crate::clear_bit;
+use crate::board::state::{ChessGameState, GameStateParser};
 use crate::moves::move_generator::{MoveCalculator, MoveGenerator};
 use crate::moves::move_interfaces::{Move, Moves};
 use crate::moves::move_maker::make_move;
 use crate::moves::move_validator::validate_moves;
 
 pub struct Game{
-    pub game_state: GameState,
+    pub game_state: ChessGameState,
     pub move_generator: MoveGenerator,
     pub default_fen: String
 }
 
 impl Game {
-    pub fn get_game_state_mut(&mut self) -> &mut GameState {
+    pub fn get_game_state_mut(&mut self) -> &mut ChessGameState {
         &mut self.game_state
     }
     pub fn get_move_gen_mut(&mut self) -> &mut MoveGenerator {
@@ -31,7 +31,7 @@ pub trait GameHandler {
 
 impl Default for Game {
     fn default() -> Self {
-        let game_state = GameState { ..Default::default() };
+        let game_state = ChessGameState { ..Default::default() };
         let move_generator = MoveGenerator { ..Default::default() };
         let default_fen : String = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR".to_string();
         return Self {
@@ -78,6 +78,14 @@ impl GameHandler for Game {
         if *move_squares.get(0).unwrap() == start_square {
             move_squares.reverse();
         }
+        let start_sq = *move_squares.get(0).unwrap();
+        for p in 0..12 {
+            if get_bit!(self.game_state.bb[p], start_sq) {
+                move_squares.push(p as i32);
+                break;
+            }
+        }
+        if move_squares.len() == 2 {move_squares.push(-1);}
 
         return move_squares;
     }

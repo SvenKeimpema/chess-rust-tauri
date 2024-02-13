@@ -1,0 +1,8 @@
+If you want to test the chess game you will need to set in the .env:
+
+TESTING: true
+
+Also you will need to source the .env
+
+this currently isn't perfect and can be changed after something is done about:
+https://github.com/tauri-apps/tauri/issues/8714

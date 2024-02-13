@@ -9,7 +9,7 @@ pub struct SaveState {
 /// bb: list of 12 vectors of positions of pieces(every piece has its own u64 so we can identify which piece is which)
 /// <br><br>occ: list of 3 u64's 1st is whites occ, 2nd is blacks occ, 3rd is whites and blacks occ together
 /// <br><br>white_to_move: dictates which side is allowed to move
-pub struct GameState {
+pub struct ChessGameState {
     pub bb: Vec<u64>,
     pub occ: Vec<u64>,
     pub white_to_move: bool,
@@ -22,9 +22,10 @@ pub trait GameStateParser {
     fn update_occ(&mut self);
     fn save_state(&mut self);
     fn undo_state(&mut self);
+    fn get_occ_idx(&mut self) -> i32;
 }
 
-impl Default for GameState {
+impl Default for ChessGameState {
     fn default() -> Self {
         return Self {
             bb: vec![0u64; 12],
@@ -35,12 +36,11 @@ impl Default for GameState {
     }
 }
 
-impl GameStateParser for GameState {
+impl GameStateParser for ChessGameState {
     /// returns which side needs to be check if there is a piece
     fn get_capture_occ_idx(&mut self) -> i32 {
         return if self.white_to_move { 1 } else { 0 };
     }
-
     /// parses fen based on(Forsyth-Edwards Notation)
     /// https://nl.wikipedia.org/wiki/Forsyth-Edwards_Notation
     fn parse_fen(&mut self, fen: &String) {
@@ -138,4 +138,6 @@ impl GameStateParser for GameState {
         self.occ = saved_state.occ;
         self.white_to_move = saved_state.white_to_move;
     }
+
+    fn get_occ_idx(&mut self) -> i32 { return if self.white_to_move {0} else {1}; }
 }

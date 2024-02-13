@@ -2,7 +2,7 @@ use std::default::Default;
 
 use crate::{clear_bit, get_bit};
 use crate::board::bitboard::math::get_ls1b;
-use crate::board::state::{GameState, GameStateParser};
+use crate::board::state::{ChessGameState, GameStateParser};
 use crate::moves::magic_moves::{MagicMoves, MagicMovesGenerator, MagicMovesInit};
 use crate::moves::move_interfaces::{AddMove, Moves};
 use crate::pieces::king::King;
@@ -18,25 +18,25 @@ pub struct MoveGenerator {
 }
 
 pub trait MoveCalculator {
-    fn generate_moves(&mut self, state: &mut GameState) -> Moves;
+    fn generate_moves(&mut self, state: &mut ChessGameState) -> Moves;
 }
 
 trait AllPiecesCalculator {
-    fn generate_white_pawn_moves(&mut self, moves: &mut Moves, state: &mut GameState);
-    fn generate_black_pawn_moves(&mut self, moves: &mut Moves, state: &mut GameState);
-    fn generate_pawn_capture(&mut self, piece_sq: i32, captures: u64, moves: &mut Moves, state: &mut GameState);
-    fn generate_knight_moves(&mut self, moves: &mut Moves, state: &mut GameState);
-    fn generate_bishop_moves(&mut self, moves: &mut Moves, state: &mut GameState);
-    fn generate_rook_moves(&mut self, moves: &mut Moves, state: &mut GameState);
-    fn generate_queen_moves(&mut self, moves: &mut Moves, state: &mut GameState);
-    fn generate_king_moves(&mut self, moves: &mut Moves, state: &mut GameState);
+    fn generate_white_pawn_moves(&mut self, moves: &mut Moves, state: &mut ChessGameState);
+    fn generate_black_pawn_moves(&mut self, moves: &mut Moves, state: &mut ChessGameState);
+    fn generate_pawn_capture(&mut self, piece_sq: i32, captures: u64, moves: &mut Moves, state: &mut ChessGameState);
+    fn generate_knight_moves(&mut self, moves: &mut Moves, state: &mut ChessGameState);
+    fn generate_bishop_moves(&mut self, moves: &mut Moves, state: &mut ChessGameState);
+    fn generate_rook_moves(&mut self, moves: &mut Moves, state: &mut ChessGameState);
+    fn generate_queen_moves(&mut self, moves: &mut Moves, state: &mut ChessGameState);
+    fn generate_king_moves(&mut self, moves: &mut Moves, state: &mut ChessGameState);
     fn generate_attacking_moves(
-        &mut self, start_sq: i32, piece_type: i32, attacking_moves: u64, moves: &mut Moves, state: &mut GameState,
+        &mut self, start_sq: i32, piece_type: i32, attacking_moves: u64, moves: &mut Moves, state: &mut ChessGameState,
     );
 }
 
 impl MoveCalculator for MoveGenerator {
-    fn generate_moves(&mut self, state: &mut GameState) -> Moves {
+    fn generate_moves(&mut self, state: &mut ChessGameState) -> Moves {
         let mut moves = Moves { ..Default::default() };
 
         if state.white_to_move {
@@ -57,7 +57,7 @@ impl MoveCalculator for MoveGenerator {
 
 impl AllPiecesCalculator for MoveGenerator {
     /// generates moves for all (white)pawns currently on the board
-    fn generate_white_pawn_moves(&mut self, mut moves: &mut Moves, state: &mut GameState) {
+    fn generate_white_pawn_moves(&mut self, mut moves: &mut Moves, state: &mut ChessGameState) {
         let piece_type: i32 = 0;
         let mut bb: u64 = state.bb[piece_type as usize];
 
@@ -80,7 +80,7 @@ impl AllPiecesCalculator for MoveGenerator {
     }
 
     /// generates moves for all (black)pawns currently on the board
-    fn generate_black_pawn_moves(&mut self, mut moves: &mut Moves, state: &mut GameState) {
+    fn generate_black_pawn_moves(&mut self, mut moves: &mut Moves, state: &mut ChessGameState) {
         // all black pawns
         let piece_type: i32 = 6;
         let mut bb: u64 = state.bb[piece_type as usize];
@@ -108,7 +108,7 @@ impl AllPiecesCalculator for MoveGenerator {
     }
 
     /// attacking moves for pawns that are set on the u64 will goto moves based on the game state and the piece square
-    fn generate_pawn_capture(&mut self, piece_sq: i32, mut captures: u64, moves: &mut Moves, state: &mut GameState) {
+    fn generate_pawn_capture(&mut self, piece_sq: i32, mut captures: u64, moves: &mut Moves, state: &mut ChessGameState) {
         let piece_type = if state.white_to_move { 0 } else { 6 };
         let occ_idx = if state.white_to_move { 1 } else { 0 };
 
@@ -124,7 +124,7 @@ impl AllPiecesCalculator for MoveGenerator {
     }
 
     /// generates all moves for the knight on the current board
-    fn generate_knight_moves(&mut self, mut moves: &mut Moves, state: &mut GameState) {
+    fn generate_knight_moves(&mut self, mut moves: &mut Moves, state: &mut ChessGameState) {
         // knights bb
         let piece_type: i32 = if state.white_to_move { 1 } else { 7 };
         let mut bb = state.bb[piece_type as usize];
@@ -137,7 +137,7 @@ impl AllPiecesCalculator for MoveGenerator {
     }
 
     /// generates all moves for the bishop on the current board
-    fn generate_bishop_moves(&mut self, moves: &mut Moves, state: &mut GameState) {
+    fn generate_bishop_moves(&mut self, moves: &mut Moves, state: &mut ChessGameState) {
         // bishop bb
         let piece_type: i32 = if state.white_to_move { 2 } else { 8 };
         let mut bb = state.bb[piece_type as usize];
@@ -151,7 +151,7 @@ impl AllPiecesCalculator for MoveGenerator {
     }
 
     /// generates all moves for the rook on the current board
-    fn generate_rook_moves(&mut self, mut moves: &mut Moves, state: &mut GameState) {
+    fn generate_rook_moves(&mut self, mut moves: &mut Moves, state: &mut ChessGameState) {
         // bishop bb
         let piece_type: i32 = if state.white_to_move { 3 } else { 9 };
         let mut bb = state.bb[piece_type as usize];
@@ -165,7 +165,7 @@ impl AllPiecesCalculator for MoveGenerator {
     }
 
     /// generates all moves for the queen on the current board
-    fn generate_queen_moves(&mut self, mut moves: &mut Moves, state: &mut GameState) {
+    fn generate_queen_moves(&mut self, mut moves: &mut Moves, state: &mut ChessGameState) {
         let piece_type: i32 = if state.white_to_move { 4 } else { 10 };
         let mut bb: u64 = state.bb[piece_type as usize];
         while bb != 0u64 {
@@ -182,7 +182,7 @@ impl AllPiecesCalculator for MoveGenerator {
     }
 
     /// generates all moves for the king on the current board
-    fn generate_king_moves(&mut self, mut moves: &mut Moves, state: &mut GameState) {
+    fn generate_king_moves(&mut self, mut moves: &mut Moves, state: &mut ChessGameState) {
         let piece_type: i32 = if state.white_to_move { 5 } else { 11 };
         let mut bb: u64 = state.bb[piece_type as usize];
         while bb != 0u64 {
@@ -198,7 +198,7 @@ impl AllPiecesCalculator for MoveGenerator {
     /// generates the moves for pieces, adds a move non-capture move if there isn't a piece on the given square.
     /// if there is a piece on the attacking square we can set capture=true
     fn generate_attacking_moves(
-        &mut self, start_sq: i32, piece_type: i32, mut attacking_moves: u64, moves: &mut Moves, state: &mut GameState,
+        &mut self, start_sq: i32, piece_type: i32, mut attacking_moves: u64, moves: &mut Moves, state: &mut ChessGameState,
     ) {
         let occ_idx = state.get_capture_occ_idx();
         while attacking_moves != 0u64 {

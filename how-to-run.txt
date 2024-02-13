@@ -1,0 +1,11 @@
+to run the tauri application you will need to install rust and cargo for windows:
+https://forge.rust-lang.org/infra/other-installation-methods.html
+
+also you will need npm for windows:
+https://nodejs.org/en/download/
+
+then you will need to install the node-modules in this project with:
+`npm install`
+
+and finally you can run:
+`npm run tauri dev`
